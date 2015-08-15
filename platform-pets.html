@@ -21,6 +21,9 @@
 
 		<script src="AltspaceSDK/src/cursor/ColorHoverEffect.js"></script>
 		<script src="AltspaceSDK/src/cursor/DragPlaneEffect.js"></script>
+		
+		<!-- keyboard events -->
+		<script src="threex.keyboardstate.js"></script>
 
 		<style>
 			body {
@@ -59,6 +62,7 @@ var cursorEvents, firebaseSync;
 var cube;
 var cubeHeight;
 var sound;
+var keyboard;
 
 var mainCount = 0;
 
@@ -80,6 +84,8 @@ function onModelsLoaded() {
 
 	initScene();
 	initSync();
+	
+	keyboard = new THREEx.KeyboardState();
 
 }
 
@@ -226,9 +232,23 @@ function animate() {
 
 	requestAnimationFrame( animate );
 
+    var moveSpeed = 5.0;
 	cursorEvents.update();
-
-	cube.rotation.y += 0.01;
+	if (keyboard.pressed("i")){
+		cube.position.z -= moveSpeed;
+	}
+	if (keyboard.pressed("k")){
+		cube.position.z += moveSpeed;
+	}
+	if (keyboard.pressed("j")){
+		cube.position.x -= moveSpeed;
+	}
+	if (keyboard.pressed("l")){
+		cube.position.x += moveSpeed;
+	}
+	if (keyboard.pressed("f")){
+		console.log("todo: jump");
+	}
 
 	renderer.render( scene, camera );
 
@@ -240,4 +260,3 @@ window.addEventListener( mainEventName, main);
 </script>
 </body>
 </html>
-
