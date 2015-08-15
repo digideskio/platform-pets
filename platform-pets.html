@@ -119,11 +119,12 @@ function onModelsLoaded() {
 	
 	// Ground
 	ground = new Physijs.BoxMesh(
-		new THREE.BoxGeometry(10000, 1, 10000),
+		new THREE.BoxGeometry(3000, 1, 3000),
 		ground_material,
 		0 // mass
 	);
 	ground.receiveShadow = true;
+	ground.position.set(0, -200, 0);
 	scene.add( ground );
 	
 	box = new Physijs.BoxMesh(
@@ -359,6 +360,15 @@ function animate() {
 	render_stats.update();
 
 }
+
+// FIXME: Input NEEDS to be handled through JumpStart calls, for tick-sync.
+document.addEventListener("keydown", function(e)
+{
+	if( e.keyCode == 88 )
+	{
+		console.log("hello world");
+	}
+}, false);
 
 var mainEventName = inAltspace ? "AltContentLoaded" : "DOMContentLoaded";
 window.addEventListener( mainEventName, main);
