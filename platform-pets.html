@@ -1,7 +1,7 @@
 <!--
 	Pet Platformers Game
 
-	Author: John and Abdullah
+	Author: John Shaughnessy and Abdullah Yousufi
 	Copyright (c) 2015 Altspace VR
 -->
 <!DOCTYPE html>
@@ -22,7 +22,7 @@
 
 		<script src="AltspaceSDK/src/cursor/ColorHoverEffect.js"></script>
 		<script src="AltspaceSDK/src/cursor/DragPlaneEffect.js"></script>
-		
+
 		<script src="PerlinNoise.js"></script>
 
 		<!-- keyboard events -->
@@ -30,7 +30,7 @@
 		<!-- physics -->
 		<script type="text/javascript" src="Physijs/physi.js"></script>
 		<script type="text/javascript" src="Physijs/examples/js/stats.js"></script>
-		
+
 		<script src="GSAP/tween.min.js"></script>
 	    <script src="GSAP/EasePack.min.js"></script>
 	    <script src="GSAP/TweenLite.min.js"></script>
@@ -115,16 +115,24 @@
 					.4, // low friction
 					.6 // high restitution
 				);
-				box_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
+				box_material.map.wrapS = box_material.map.wrapT = THREE.RepeatWrapping;
 				box_material.map.repeat.set( .25, .25 );
 
-				block_material = Physijs.createMaterial(
-					new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'Physijs/examples/images/wood.jpg' ) }),
+				grass_material = Physijs.createMaterial(
+					new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'images/grass.jpg' ) }),
 					.4, // low friction
 					.6 // high restitution
 				);
-				block_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
-				block_material.map.repeat.set( .25, .25 );
+				grass_material.map.wrapS = grass_material.map.wrapT = THREE.RepeatWrapping;
+				grass_material.map.repeat.set( .25, .25 );
+
+				dirt_material = Physijs.createMaterial(
+					new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'images/dirt.jpg' ) }),
+					.4, // low friction
+					.6 // high restitution
+				);
+				dirt_material.map.wrapS = dirt_material.map.wrapT = THREE.RepeatWrapping;
+				dirt_material.map.repeat.set( .25, .25 );
 
 				// Ground
 				ground = new Physijs.BoxMesh(
@@ -134,40 +142,49 @@
 				);
 				ground.receiveShadow = true;
 				ground.position.set(0, 0, 0);
-				scene.add( ground );
+				// scene.add( ground );
 
-				perlin2D = new PerlinNoise(0.1, 5.0, 3, 2);
-
-				for(var i = 0; i <= 38; i+=2){
-					for(var j = 0; j <= 30; j+=2){
-						mesh = new Physijs.BoxMesh(new THREE.BoxGeometry( 40, 40, 40 ), block_material);
-						mesh.position.y = -250 + perlin2D.perlinNoise2D(i, j) * 1000;
-						mesh.position.x = i * 30 - 19 * 30;
-						mesh.position.z = j * 30 - 15 * 30;
+				perlin2D = new PerlinNoise(0.5, 1.0, 3, 2);
+				var numX = 15;
+				var numZ = 15;
+				var spacing = 1;
+				for(var i = 0; i <= numX * spacing ; i+=spacing){
+					for(var j = 0; j <= numZ * spacing; j+=spacing){
+						mesh = new Physijs.BoxMesh(new THREE.BoxGeometry( 40, 40, 40 ), grass_material);
+						mesh.position.y = 0 + perlin2D.perlinNoise2D(i, j) * 150;
+						mesh.position.x = i * 40 - numX * 20;
+						mesh.position.z = j * 40 - numZ * 20;
 						mesh.mass = 0;
-						var noise = perlin2D.noise2D(i, j);
-						if(!inAltspace){
-							var anim = new TimelineMax({repeat: -1});
-							var moveX = 0;
-							var moveY = 0;
-							var moveZ = 0;
-							var scale = 100;
-							if(noise < -0.66){
-								moveX = noise * scale;
-							}
-							else if(noise >= -0.66 && noise <= 0.33){
-								moveY = noise * scale * 2;
-							}
-		    				else if (noise > 0.33){
-		    					moveZ = noise * scale;
-		    				}
-						    anim.to(mesh.position, noise + 5, {x: mesh.position.x + moveX, y: mesh.position.y + moveY, z: mesh.position.z + moveZ, ease:Power0.easeOut});
-	    					anim.to(mesh.position, noise + 5, {x: mesh.position.x, y: mesh.position.y, z: mesh.position.z, ease:Power0.easeIn});
+						for(var k = 0; k <= 1; k++){
+							var mesh_clone = new Physijs.BoxMesh(mesh.clone().geometry, dirt_material, 0);
+							mesh_clone.position.x = mesh.position.x;
+							mesh_clone.position.y = mesh.position.y - (k+1) * 40;
+							mesh_clone.position.z = mesh.position.z;
+							scene.add(mesh_clone);
 						}
+						var noise = perlin2D.noise2D(i, j);
+						// if(!inAltspace){
+						// 	var anim = new TimelineMax({repeat: -1});
+						// 	var moveX = 0;
+						// 	var moveY = 0;
+						// 	var moveZ = 0;
+						// 	var scale = 100;
+						// 	if(noise < -0.66){
+						// 		moveX = noise * scale;
+						// 	}
+						// 	else if(noise >= -0.66 && noise <= 0.33){
+						// 		moveY = noise * scale * 2;
+						// 	}
+		    			//	else if (noise > 0.33){
+		    			//		moveZ = noise * scale;
+		    			//	}
+						//     anim.to(mesh.position, noise + 5, {x: mesh.position.x + moveX, y: mesh.position.y + moveY, z: mesh.position.z + moveZ, ease:Power0.easeOut});
+	    				//     anim.to(mesh.position, noise + 5, {x: mesh.position.x, y: mesh.position.y, z: mesh.position.z, ease:Power0.easeIn});
+						// }
 						scene.add(mesh);
 					}
 				}
-				
+
 				box = new Physijs.BoxMesh(
 					new THREE.BoxGeometry( 4, 4, 4 ),
 					box_material
@@ -200,27 +217,28 @@
 
 			}
 
-			function applyForce()
+			function applyForce(e)
 			{
+				var keycode = e.which;
 				var effect, offset, box;
 
 				var force = new THREE.Vector3(0,0,0);
 				var zoom = 300;
-				//if (keyboard.pressed("i")){
-				//	force.z = -zoom;
-				//}
-				//if (keyboard.pressed("k")){
-				//	force.z = zoom;
-				//}
-				//if (keyboard.pressed("j")){
-				//	force.x = -zoom;
-				//}
-				//if (keyboard.pressed("l")){
-				//	force.x = zoom;
-				//}
-				//if (keyboard.pressed("f")){
-				//	force.y = zoom*10;
-				//}
+				if (keycode == "I".charCodeAt(0)){
+					force.z = -zoom;
+				}
+				if (keycode == "K".charCodeAt(0)){
+					force.z = zoom;
+				}
+				if (keycode == "J".charCodeAt(0)){
+					force.x = -zoom;
+				}
+				if (keycode == "L".charCodeAt(0)){
+					force.x = zoom;
+				}
+				if (keycode == "F".charCodeAt(0)){
+					force.y = zoom*10;
+				}
 
 				for ( var i = 0; i < boxes.length; i++ ) {
 					box = boxes[i];
@@ -255,7 +273,7 @@
 				scene.addEventListener(
 					'update',
 					function() {
-						applyForce();
+						// applyForce();
 						scene.simulate( undefined, 1 );
 						physics_stats.update();
 					}
@@ -325,10 +343,7 @@
 				// cursorEvents.addEffect( dragEffect, cube );
 				// cursorEvents.addEffect( hoverEffect, cube );
 				window.addEventListener( 'resize', onWindowResize, false );
-				document.addEventListener("keydown", function(e){
-						console.log("hello world");
-				}, false);
-
+				document.addEventListener("keydown", applyForce, false);
 			}
 
 			function initSync() {
