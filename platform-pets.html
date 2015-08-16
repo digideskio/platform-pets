@@ -22,6 +22,8 @@
 
 		<script src="AltspaceSDK/src/cursor/ColorHoverEffect.js"></script>
 		<script src="AltspaceSDK/src/cursor/DragPlaneEffect.js"></script>
+		
+		<script src="PerlinNoise.js"></script>
 
 		<!-- keyboard events -->
 		<!--<script src="threex.keyboardstate.js"></script>-->
@@ -108,6 +110,14 @@
 				box_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
 				box_material.map.repeat.set( .25, .25 );
 
+				block_material = Physijs.createMaterial(
+					new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'Physijs/examples/images/wood.jpg' ) }),
+					.4, // low friction
+					.6 // high restitution
+				);
+				block_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
+				block_material.map.repeat.set( .25, .25 );
+
 				// Ground
 				ground = new Physijs.BoxMesh(
 					new THREE.BoxGeometry(1000, 1, 1000),
@@ -118,13 +128,26 @@
 				ground.position.set(0, 0, 0);
 				scene.add( ground );
 
+				perlin2D = new PerlinNoise(0.1, 5.0, 3, 2);
+
+				for(var i = 0; i <= 38; i+=2){
+					for(var j = 0; j <= 30; j+=2){
+						mesh = new Physijs.BoxMesh(new THREE.BoxGeometry( 40, 40, 40 ), block_material);
+						mesh.position.y = -250 + perlin2D.perlinNoise2D(i, j) * 1000;
+						mesh.position.x = i * 30 - 19 * 30;
+						mesh.position.z = j * 30 - 15 * 30;
+						mesh.mass = 0;
+						scene.add(mesh);
+					}
+				}
+				
 				box = new Physijs.BoxMesh(
 					new THREE.BoxGeometry( 4, 4, 4 ),
 					box_material
 				);
 				box.position.set(
 					Math.random() * 50 - 25,
-					200 + Math.random() * 50,
+					300 + Math.random() * 50,
 					Math.random() * 50 - 25
 				);
 				box.rotation.set(
