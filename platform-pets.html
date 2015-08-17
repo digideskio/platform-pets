@@ -71,9 +71,6 @@
 
 			//var keyboard;
 
-			var render_stats, physics_stats;
-			var box_material, ground_material, ground, boxes=[];
-
 			var prevTimestamp = 0;
 			var perlin2D, perlin3D;
 
@@ -152,6 +149,14 @@
 				stats.domElement.style.position = 'absolute';
 				stats.domElement.style.top = '0px';
 				container.appendChild( stats.domElement );
+				
+				// pet
+				var pet;
+				pet = new THREE.Mesh(new THREE.BoxGeometry(50,50,50), new THREE.MeshBasicMaterial({ color: 0x0000ff, map: THREE.ImageUtils.loadTexture('images/polka.png') }));
+				pet.position.x = 0;
+				pet.position.y = 1000;
+				pet.position.z = 0;
+				scene.add(pet);
 
   				// procedural environment
 				perlin2D = new PerlinNoise(0.5, 1.0, 3, 2);
