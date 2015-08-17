@@ -12,6 +12,9 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<script src="three.min.js"></script>
+		<script src="stats.min.js"></script>
+		<script src="OrbitControls.js"></script>
+		
 		<!-- Required by OBJMTLLoader.js -->
 		<script src="AltspaceSDK/src/AltOBJMTLLoader.js"></script>
 		<script src="AltspaceSDK/lib/firebase.js"></script>
@@ -26,7 +29,7 @@
 		<script src="PerlinNoise.js"></script>
 
 		<!-- keyboard events -->
-		<script src="threex.keyboardstate.js"></script>
+		<!-- <script src="threex.keyboardstate.js"></script> -->
 
 		<script src="GSAP/tween.min.js"></script>
 	    <script src="GSAP/EasePack.min.js"></script>
@@ -59,14 +62,14 @@
 
 			var inAltspace = window.hasOwnProperty('altspace');
 
-			var scene, camera, renderer, altRenderer;
+			var scene, camera, renderer, altRenderer, controls;
 			var cursorEvents, firebaseSync;
 			var loader;
 			var sound;
-
+			var stats;
 			var platformAnimations = [[]];
 
-			var keyboard;
+			//var keyboard;
 
 			var render_stats, physics_stats;
 			var box_material, ground_material, ground, boxes=[];
@@ -94,7 +97,7 @@
 				initScene();
 				initSync();
 
-				keyboard = new THREEx.KeyboardState();
+				//keyboard = new THREEx.KeyboardState();
 
 			}
 
@@ -135,6 +138,8 @@
 					camera.position.y = 300;
 					camera.lookAt( scene.position );
 					
+					controls = new THREE.OrbitControls(camera, renderer.domElement);
+					
 				}
 				// OBJMTLLoader always uses PhongMaterial, so we need light in scene.
 				var ambient = new THREE.AmbientLight( 0xffffff );
@@ -143,14 +148,19 @@
 				pointLight = new THREE.PointLight( 0xffffff, 1.75 );
 				scene.add( pointLight );
 				
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				container.appendChild( stats.domElement );
+				
   				// procedural environment
 				perlin2D = new PerlinNoise(0.5, 1.0, 3, 2);
 				var numX = 15;
 				var numZ = 15;
 				var spacing = 1;
 				var blockGeometry = new THREE.BoxGeometry( 40, 40, 40 );
-				var grassMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-				var dirtMaterial = new THREE.MeshBasicMaterial({ color: 0x996633 });
+				var grassMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+				var dirtMaterial = new THREE.MeshBasicMaterial({ color: 0x996633, wireframe: true });
 				for(var i = 0; i <= numX * spacing ; i+=spacing){
 					for(var j = 0; j <= numZ * spacing; j+=spacing){
 						mesh = new THREE.Mesh(blockGeometry, grassMaterial);
@@ -260,20 +270,20 @@
 				prevTimestamp = timestamp;
 				requestAnimationFrame( animate );
 				cursorEvents.update();
-				
-				/*
-				if (keyboard.pressed("j")){
-					console.log("hello");
-				}
-				*/
-
+				stats.update();
+				render(timestamp);
+			}
+			
+			function render(timestamp){
 				if(inAltspace){
 					altRenderer.render( scene, camera );
 				}
 				else{
 					renderer.render( scene, camera );
+					controls.update(timestamp);
 				}
 			}
+			
 		</script>
 	</body>
 </html>

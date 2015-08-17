@@ -1,13 +1,23 @@
 <html>
 <body>
+ <div>
+   <!-- click here for focus -->
+   <h1> hello world </h1>
+ </div>
+<!-- this works -->
+<script>
+	document.addEventListener("keydown", function() { console.log("keypress"); }, false);
+</script>
+
+
 	<script src="threex.keyboardstate.js"></script>
-	<script>
+	<script> 
 	var keyboard	= new THREEx.KeyboardState();
 	setInterval(function(){
-		var key		= "alt+left";
+		var key		= "h";
 		var pressed	= keyboard.pressed(key);
 		console.log("key", key, "pressed", pressed);
 	}, 100);
-	</script>
+	</script> 
 </body>
 </html>
