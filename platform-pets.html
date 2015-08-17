@@ -181,7 +181,7 @@
 							else if (noise > 0.33){
 							moveZ = noise * scale;
 						}
-						for(var k = 0; k <= 1; k++){
+						for(var k = 0; k <= ((i * j) % 15) / 3 ; k++){
 							var dirtMesh = new THREE.Mesh(blockGeometry, dirtMaterial);
 							dirtMesh.position.x = mesh.position.x;
 							dirtMesh.position.y = mesh.position.y - (k+1) * 40;
