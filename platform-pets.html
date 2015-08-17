@@ -26,10 +26,7 @@
 		<script src="PerlinNoise.js"></script>
 
 		<!-- keyboard events -->
-		<!--<script src="threex.keyboardstate.js"></script>-->
-		<!-- physics -->
-		<script type="text/javascript" src="Physijs/physi.js"></script>
-		<script type="text/javascript" src="Physijs/examples/js/stats.js"></script>
+		<script src="threex.keyboardstate.js"></script>
 
 		<script src="GSAP/tween.min.js"></script>
 	    <script src="GSAP/EasePack.min.js"></script>
@@ -59,8 +56,6 @@
 		<div id="viewport"></div>
 
 		<script>
-			Physijs.scripts.worker = 'Physijs/physijs_worker.js';
-			Physijs.scripts.ammo = 'examples/js/ammo.js';
 
 			var inAltspace = window.hasOwnProperty('altspace');
 
@@ -71,7 +66,7 @@
 
 			var platformAnimations = [[]];
 
-			//var keyboard;
+			var keyboard;
 
 			var render_stats, physics_stats;
 			var box_material, ground_material, ground, boxes=[];
@@ -99,114 +94,7 @@
 				initScene();
 				initSync();
 
-				//keyboard = new THREEx.KeyboardState();
-
-				// Materials
-				ground_material = Physijs.createMaterial(
-					new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'Physijs/examples/images/rocks.jpg' ) }),
-					.8, // high friction
-					.4 // low restitution
-				);
-				ground_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
-				ground_material.map.repeat.set( 3, 3 );
-
-				box_material = Physijs.createMaterial(
-					new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'Physijs/examples/images/plywood.jpg' ) }),
-					.4, // low friction
-					.6 // high restitution
-				);
-				box_material.map.wrapS = box_material.map.wrapT = THREE.RepeatWrapping;
-				box_material.map.repeat.set( .25, .25 );
-
-				grass_material = Physijs.createMaterial(
-					new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'images/grass.jpg' ) }),
-					.4, // low friction
-					.6 // high restitution
-				);
-				grass_material.map.wrapS = grass_material.map.wrapT = THREE.RepeatWrapping;
-				grass_material.map.repeat.set( .25, .25 );
-
-				dirt_material = Physijs.createMaterial(
-					new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'images/dirt.jpg' ) }),
-					.4, // low friction
-					.6 // high restitution
-				);
-				dirt_material.map.wrapS = dirt_material.map.wrapT = THREE.RepeatWrapping;
-				dirt_material.map.repeat.set( .25, .25 );
-
-				// Ground
-				ground = new Physijs.BoxMesh(
-					new THREE.BoxGeometry(1000, 1, 1000),
-					ground_material,
-					0 // mass
-				);
-				ground.receiveShadow = true;
-				ground.position.set(0, 0, 0);
-				// scene.add( ground );
-
-				perlin2D = new PerlinNoise(0.5, 1.0, 3, 2);
-				var numX = 15;
-				var numZ = 15;
-				var spacing = 1;
-				for(var i = 0; i <= numX * spacing ; i+=spacing){
-					for(var j = 0; j <= numZ * spacing; j+=spacing){
-						mesh = new Physijs.BoxMesh(new THREE.BoxGeometry( 40, 40, 40 ), grass_material);
-						mesh.position.y = 0 + perlin2D.perlinNoise2D(i, j) * 150;
-						mesh.position.x = i * 40 - numX * 20;
-						mesh.position.z = j * 40 - numZ * 20;
-						mesh.mass = 0;
-						for(var k = 0; k <= 1; k++){
-							var mesh_clone = new Physijs.BoxMesh(mesh.clone().geometry, dirt_material, 0);
-							mesh_clone.position.x = mesh.position.x;
-							mesh_clone.position.y = mesh.position.y - (k+1) * 40;
-							mesh_clone.position.z = mesh.position.z;
-							scene.add(mesh_clone);
-						}
-						var noise = perlin2D.noise2D(i, j);
-						// if(!inAltspace){
-						// 	var anim = new TimelineMax({repeat: -1});
-						// 	var moveX = 0;
-						// 	var moveY = 0;
-						// 	var moveZ = 0;
-						// 	var scale = 100;
-						// 	if(noise < -0.66){
-						// 		moveX = noise * scale;
-						// 	}
-						// 	else if(noise >= -0.66 && noise <= 0.33){
-						// 		moveY = noise * scale * 2;
-						// 	}
-		    			//	else if (noise > 0.33){
-		    			//		moveZ = noise * scale;
-		    			//	}
-						//     anim.to(mesh.position, noise + 5, {x: mesh.position.x + moveX, y: mesh.position.y + moveY, z: mesh.position.z + moveZ, ease:Power0.easeOut});
-	    				//     anim.to(mesh.position, noise + 5, {x: mesh.position.x, y: mesh.position.y, z: mesh.position.z, ease:Power0.easeIn});
-						// }
-						scene.add(mesh);
-					}
-				}
-
-				box = new Physijs.BoxMesh(
-					new THREE.BoxGeometry( 4, 4, 4 ),
-					box_material
-				);
-				box.position.set(
-					Math.random() * 50 - 25,
-					300 + Math.random() * 50,
-					Math.random() * 50 - 25
-				);
-				box.rotation.set(
-					Math.random() * Math.PI * 2,
-					Math.random() * Math.PI * 2,
-					Math.random() * Math.PI * 2
-				);
-				box.scale.set(
-					30,30,30//Math.random() * 1 + .5,
-					//Math.random() * 1 + .5,
-					//Math.random() * 1 + .5
-				);
-				box.castShadow = true;
-				scene.add( box );
-				boxes.push( box );
+				keyboard = new THREEx.KeyboardState();
 
 			}
 
@@ -217,67 +105,10 @@
 
 			}
 
-			function applyForce(e)
-			{
-				var keycode = e.which;
-				var effect, offset, box;
-
-				var force = new THREE.Vector3(0,0,0);
-				var zoom = 300;
-				if (keycode == "I".charCodeAt(0)){
-					force.z = -zoom;
-				}
-				if (keycode == "K".charCodeAt(0)){
-					force.z = zoom;
-				}
-				if (keycode == "J".charCodeAt(0)){
-					force.x = -zoom;
-				}
-				if (keycode == "L".charCodeAt(0)){
-					force.x = zoom;
-				}
-				if (keycode == "F".charCodeAt(0)){
-					force.y = zoom*10;
-				}
-
-				for ( var i = 0; i < boxes.length; i++ ) {
-					box = boxes[i];
-					effect = force;
-					offset = new THREE.Vector3(0,0,0);
-					box.applyImpulse( effect, offset );
-				}
-			}
 
 			function initScene() {
 
-			    // default scene
-				// scene = new THREE.Scene();
-
-
-				render_stats = new Stats();
-				render_stats.domElement.style.position = 'absolute';
-				render_stats.domElement.style.top = '1px';
-				render_stats.domElement.style.zIndex = 100;
-				document.getElementById( 'viewport' ).appendChild( render_stats.domElement );
-
-				physics_stats = new Stats();
-				physics_stats.domElement.style.position = 'absolute';
-				physics_stats.domElement.style.top = '50px';
-				physics_stats.domElement.style.zIndex = 100;
-				document.getElementById( 'viewport' ).appendChild( physics_stats.domElement );
-
-				// physijs scene
-				scene = new Physijs.Scene;
-				//TODO: get real gravity
-				scene.setGravity(new THREE.Vector3( 0, -300, 0 ));
-				scene.addEventListener(
-					'update',
-					function() {
-						// applyForce();
-						scene.simulate( undefined, 1 );
-						physics_stats.update();
-					}
-				);
+				scene = new THREE.Scene();
 
 				var container = document.createElement( 'div' );
 				document.body.appendChild( container );
@@ -303,6 +134,7 @@
 					camera.position.z = 800;
 					camera.position.y = 300;
 					camera.lookAt( scene.position );
+					
 				}
 				// OBJMTLLoader always uses PhongMaterial, so we need light in scene.
 				var ambient = new THREE.AmbientLight( 0xffffff );
@@ -310,6 +142,51 @@
 
 				pointLight = new THREE.PointLight( 0xffffff, 1.75 );
 				scene.add( pointLight );
+				
+  				// procedural environment
+				perlin2D = new PerlinNoise(0.5, 1.0, 3, 2);
+				var numX = 15;
+				var numZ = 15;
+				var spacing = 1;
+				var blockGeometry = new THREE.BoxGeometry( 40, 40, 40 );
+				var grassMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+				var dirtMaterial = new THREE.MeshBasicMaterial({ color: 0x996633 });
+				for(var i = 0; i <= numX * spacing ; i+=spacing){
+					for(var j = 0; j <= numZ * spacing; j+=spacing){
+						mesh = new THREE.Mesh(blockGeometry, grassMaterial);
+						mesh.position.y = 0 + perlin2D.perlinNoise2D(i, j) * 150;
+						mesh.position.x = i * 40 - numX * 20;
+						mesh.position.z = j * 40 - numZ * 20;
+						mesh.mass = 0;
+						for(var k = 0; k <= 1; k++){
+							var dirtMesh = new THREE.Mesh(blockGeometry, dirtMaterial);
+							dirtMesh.position.x = mesh.position.x;
+							dirtMesh.position.y = mesh.position.y - (k+1) * 40;
+							dirtMesh.position.z = mesh.position.z;
+							scene.add(dirtMesh);
+						}
+						var noise = perlin2D.noise2D(i, j);
+						// if(!inAltspace){
+						// 	var anim = new TimelineMax({repeat: -1});
+						// 	var moveX = 0;
+						// 	var moveY = 0;
+						// 	var moveZ = 0;
+						// 	var scale = 100;
+						// 	if(noise < -0.66){
+						// 		moveX = noise * scale;
+						// 	}
+						// 	else if(noise >= -0.66 && noise <= 0.33){
+						// 		moveY = noise * scale * 2;
+						// 	}
+		    			//	else if (noise > 0.33){
+		    			//		moveZ = noise * scale;
+		    			//	}
+						//     anim.to(mesh.position, noise + 5, {x: mesh.position.x + moveX, y: mesh.position.y + moveY, z: mesh.position.z + moveZ, ease:Power0.easeOut});
+	    				//     anim.to(mesh.position, noise + 5, {x: mesh.position.x, y: mesh.position.y, z: mesh.position.z, ease:Power0.easeIn});
+						// }
+						scene.add(mesh);
+					}
+				}
 			}
 
 
@@ -343,7 +220,7 @@
 				// cursorEvents.addEffect( dragEffect, cube );
 				// cursorEvents.addEffect( hoverEffect, cube );
 				window.addEventListener( 'resize', onWindowResize, false );
-				document.addEventListener("keydown", applyForce, false);
+				document.addEventListener("keydown", function() { console.log("keypress"); }, false);
 			}
 
 			function initSync() {
@@ -381,17 +258,21 @@
 			function animate( timestamp ) {
 				var frameTime = ( timestamp - prevTimestamp ) * 0.001;
 				prevTimestamp = timestamp;
-
-				cursorEvents.update();
-
-				if(inAltspace)
-					altRenderer.render( scene, camera );
-				else
-					renderer.render( scene, camera );
-
-				scene.simulate();
-				render_stats.update();
 				requestAnimationFrame( animate );
+				cursorEvents.update();
+				
+				/*
+				if (keyboard.pressed("j")){
+					console.log("hello");
+				}
+				*/
+
+				if(inAltspace){
+					altRenderer.render( scene, camera );
+				}
+				else{
+					renderer.render( scene, camera );
+				}
 			}
 		</script>
 	</body>
