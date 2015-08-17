@@ -14,7 +14,7 @@
 		<script src="three.min.js"></script>
 		<script src="stats.min.js"></script>
 		<script src="OrbitControls.js"></script>
-		
+
 		<!-- Required by OBJMTLLoader.js -->
 		<script src="AltspaceSDK/src/AltOBJMTLLoader.js"></script>
 		<script src="AltspaceSDK/lib/firebase.js"></script>
@@ -137,9 +137,9 @@
 					camera.position.z = 800;
 					camera.position.y = 300;
 					camera.lookAt( scene.position );
-					
+
 					controls = new THREE.OrbitControls(camera, renderer.domElement);
-					
+
 				}
 				// OBJMTLLoader always uses PhongMaterial, so we need light in scene.
 				var ambient = new THREE.AmbientLight( 0xffffff );
@@ -147,12 +147,12 @@
 
 				pointLight = new THREE.PointLight( 0xffffff, 1.75 );
 				scene.add( pointLight );
-				
+
 				stats = new Stats();
 				stats.domElement.style.position = 'absolute';
 				stats.domElement.style.top = '0px';
 				container.appendChild( stats.domElement );
-				
+
   				// procedural environment
 				perlin2D = new PerlinNoise(0.5, 1.0, 3, 2);
 				var numX = 15;
@@ -168,32 +168,37 @@
 						mesh.position.x = i * 40 - numX * 20;
 						mesh.position.z = j * 40 - numZ * 20;
 						mesh.mass = 0;
+						var noise = perlin2D.noise2D(i, j);
+						var moveX = 0;
+						var moveY = 0;
+						var moveZ = 0;
+						var scale = 100;
+						if(noise < -0.66){
+							moveX = noise * scale;
+						}
+						else if(noise >= -0.66 && noise <= 0.33){
+							moveY = noise * scale * 2;
+						}
+							else if (noise > 0.33){
+							moveZ = noise * scale;
+						}
 						for(var k = 0; k <= 1; k++){
 							var dirtMesh = new THREE.Mesh(blockGeometry, dirtMaterial);
 							dirtMesh.position.x = mesh.position.x;
 							dirtMesh.position.y = mesh.position.y - (k+1) * 40;
 							dirtMesh.position.z = mesh.position.z;
+							if(!inAltspace){
+								var anim = new TimelineMax({repeat: -1});
+							    anim.to(dirtMesh.position, noise + 5, {x: dirtMesh.position.x + moveX, y: dirtMesh.position.y + moveY, z: dirtMesh.position.z + moveZ, ease:Power0.easeOut});
+								anim.to(dirtMesh.position, noise + 5, {x: dirtMesh.position.x, y: dirtMesh.position.y, z: dirtMesh.position.z, ease:Power0.easeIn});
+							}
 							scene.add(dirtMesh);
 						}
-						var noise = perlin2D.noise2D(i, j);
-						// if(!inAltspace){
-						// 	var anim = new TimelineMax({repeat: -1});
-						// 	var moveX = 0;
-						// 	var moveY = 0;
-						// 	var moveZ = 0;
-						// 	var scale = 100;
-						// 	if(noise < -0.66){
-						// 		moveX = noise * scale;
-						// 	}
-						// 	else if(noise >= -0.66 && noise <= 0.33){
-						// 		moveY = noise * scale * 2;
-						// 	}
-		    			//	else if (noise > 0.33){
-		    			//		moveZ = noise * scale;
-		    			//	}
-						//     anim.to(mesh.position, noise + 5, {x: mesh.position.x + moveX, y: mesh.position.y + moveY, z: mesh.position.z + moveZ, ease:Power0.easeOut});
-	    				//     anim.to(mesh.position, noise + 5, {x: mesh.position.x, y: mesh.position.y, z: mesh.position.z, ease:Power0.easeIn});
-						// }
+						if(!inAltspace){
+							var anim = new TimelineLite({repeat: -1});
+							anim.to(mesh.position, noise + 5, {x: mesh.position.x + moveX, y: mesh.position.y + moveY, z: mesh.position.z + moveZ, ease:Power0.easeOut});
+							anim.to(mesh.position, noise + 5, {x: mesh.position.x, y: mesh.position.y, z: mesh.position.z, ease:Power0.easeIn});
+						}
 						scene.add(mesh);
 					}
 				}
@@ -273,7 +278,7 @@
 				stats.update();
 				render(timestamp);
 			}
-			
+
 			function render(timestamp){
 				if(inAltspace){
 					altRenderer.render( scene, camera );
@@ -283,7 +288,7 @@
 					controls.update(timestamp);
 				}
 			}
-			
+
 		</script>
 	</body>
 </html>
