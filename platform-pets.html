@@ -16,7 +16,8 @@
 		<script src="OrbitControls.js"></script>
 
 		<!-- Required by OBJMTLLoader.js -->
-		<script src="AltspaceSDK/src/AltOBJMTLLoader.js"></script>
+		<script src="AltspaceSDK/lib/OBJMTLLoader.js"></script>
+		<script src="AltspaceSDK/lib/MTLLoader.js"></script>
 		<script src="AltspaceSDK/lib/firebase.js"></script>
 
 		<script src="AltspaceSDK/src/cursor/CursorEvents.js"></script>
@@ -29,7 +30,8 @@
 		<script src="PerlinNoise.js"></script>
 
 		<!-- keyboard events -->
-		<!-- <script src="threex.keyboardstate.js"></script> -->
+		<script src="threex.keyboardstate.js"></script> 
+		
 
 		<script src="GSAP/tween.min.js"></script>
 	    <script src="GSAP/EasePack.min.js"></script>
@@ -68,17 +70,25 @@
 			var sound;
 			var stats;
 			var platformAnimations = [[]];
+			
 
-			//var keyboard;
+			var keyboard;
 
 			var prevTimestamp = 0;
 			var perlin2D, perlin3D;
+			var pet;
+			var once = false;
+			var collidableObjects = [];
+			var raycaster = new THREE.Raycaster();
+			var thingYouLastSteppedOn;
+			var yourHeightWhenYouWereLastOnTheGround = 0;
+			var sceneCorrection = 410;
 
 			loadModels();
 
 			function loadModels() {
 
-				var loader = new THREE.AltOBJMTLLoader();
+				var loader = new THREE.OBJMTLLoader();
 
 				// loader assumes .mtl file has same basename as .obj file
 				// var objFilename = "AltspaceSDK/examples/models/AltspaceCube/cube.obj";
@@ -94,7 +104,7 @@
 				initScene();
 				initSync();
 
-				//keyboard = new THREEx.KeyboardState();
+				keyboard = new THREEx.KeyboardState();
 
 			}
 
@@ -104,8 +114,7 @@
 				animate(prevTimestamp);
 
 			}
-
-
+			
 			function initScene() {
 
 				scene = new THREE.Scene();
@@ -119,7 +128,7 @@
 					document.getElementById("info").style.visibility = "hidden";
 
 					// Place the cube at the bottom of the enclosure.
-					scene.position.y = ( -1 * window.innerHeight / 2 );
+					//scene.position.y = ( -1 * window.innerHeight / 2 );
 
 				}
 				else{
@@ -151,10 +160,9 @@
 				container.appendChild( stats.domElement );
 				
 				// pet
-				var pet;
-				pet = new THREE.Mesh(new THREE.BoxGeometry(50,50,50), new THREE.MeshBasicMaterial({ color: 0x0000ff, map: THREE.ImageUtils.loadTexture('images/polka.png') }));
+				pet = new THREE.Mesh(new THREE.BoxGeometry(20,20,20), new THREE.MeshBasicMaterial({ opacity: 0.5, color: 0x0000ff, transparent: true, map: THREE.ImageUtils.loadTexture('images/polka.png') }));
 				pet.position.x = 0;
-				pet.position.y = 1000;
+				pet.position.y = 700 - sceneCorrection;
 				pet.position.z = 0;
 				scene.add(pet);
 
@@ -166,12 +174,16 @@
 				var blockGeometry = new THREE.BoxGeometry( 40, 40, 40 );
 				var grassMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, map: THREE.ImageUtils.loadTexture('images/grass.jpg') });
 				var dirtMaterial = new THREE.MeshBasicMaterial({ color: 0x996633, map: THREE.ImageUtils.loadTexture('images/dirt.jpg') });
+				var grassMesh;
 				for(var i = 0; i <= numX * spacing ; i+=spacing){
 					for(var j = 0; j <= numZ * spacing; j+=spacing){
-						mesh = new THREE.Mesh(blockGeometry, grassMaterial);
-						mesh.position.y = perlin2D.perlinNoise2D(i, j) * 150;
-						mesh.position.x = i * 40 - numX * 20;
-						mesh.position.z = j * 40 - numZ * 20;
+						grassMesh = new THREE.Mesh(blockGeometry, grassMaterial);
+						grassMesh.position.y = perlin2D.perlinNoise2D(i, j) * 150 - sceneCorrection;
+						grassMesh.position.x = i * 40 - numX * 20;
+						grassMesh.position.z = j * 40 - numZ * 20;
+						collidableObjects.push(grassMesh);
+						scene.add(grassMesh);
+						
 						var noise = perlin2D.noise2D(i, j);
 						var moveX = 0;
 						var moveY = 0;
@@ -188,22 +200,24 @@
 						}
 						for(var k = 0; k <= ((i * j) % 15) / 3 ; k++){
 							var dirtMesh = new THREE.Mesh(blockGeometry, dirtMaterial);
-							dirtMesh.position.x = mesh.position.x;
-							dirtMesh.position.y = mesh.position.y - (k+1) * 40;
-							dirtMesh.position.z = mesh.position.z;
+							dirtMesh.position.x = grassMesh.position.x;
+							dirtMesh.position.y = (grassMesh.position.y - (k+1) * 40) ;
+							dirtMesh.position.z = grassMesh.position.z;
 							if(!inAltspace){
-								var anim = new TimelineMax({repeat: 0});
-							    anim.to(dirtMesh.position, noise + 5, {x: dirtMesh.position.x + moveX, y: dirtMesh.position.y + moveY, z: dirtMesh.position.z + moveZ, ease:Power0.easeOut});
-								anim.to(dirtMesh.position, noise + 5, {x: dirtMesh.position.x, y: dirtMesh.position.y, z: dirtMesh.position.z, ease:Power0.easeIn});
+								//var anim = new TimelineMax({repeat: 0});
+							 //   anim.to(dirtMesh.position, noise + 5, {x: dirtMesh.position.x + moveX, y: dirtMesh.position.y + moveY, z: dirtMesh.position.z + moveZ, ease:Power0.easeOut});
+								//anim.to(dirtMesh.position, noise + 5, {x: dirtMesh.position.x, y: dirtMesh.position.y, z: dirtMesh.position.z, ease:Power0.easeIn});
 							}
+							collidableObjects.push(dirtMesh);
 							scene.add(dirtMesh);
+							
 						}
 						if(!inAltspace){
-							var anim = new TimelineLite({repeat: 0});
-							anim.to(mesh.position, noise + 5, {x: mesh.position.x + moveX, y: mesh.position.y + moveY, z: mesh.position.z + moveZ, ease:Power0.easeOut});
-							anim.to(mesh.position, noise + 5, {x: mesh.position.x, y: mesh.position.y, z: mesh.position.z, ease:Power0.easeIn});
+							//var anim = new TimelineLite({repeat: 0});
+							//anim.to(grassMesh.position, noise + 5, {x: grassMesh.position.x + moveX, y: grassMesh.position.y + moveY, z: grassMesh.position.z + moveZ, ease:Power0.easeOut});
+							//anim.to(grassMesh.position, noise + 5, {x: grassMesh.position.x, y: grassMesh.position.y, z: grassMesh.position.z, ease:Power0.easeIn});
 						}
-						scene.add(mesh);
+						
 					}
 				}
 				perlin3D = new PerlinNoise(2.0, 10, 5, 0);
@@ -214,13 +228,16 @@
 							if(perlin3D.perlinNoise3D(x, y, z) > 0.7){
 								var cloudMesh = new THREE.Mesh(blockGeometry, cloudMaterial);
 								cloudMesh.position.x = x * 40 - numX * 20;
-								cloudMesh.position.y = 150 + y * 40;
+								cloudMesh.position.y = (150 + y * 40) - sceneCorrection;
 								cloudMesh.position.z = z * 40 - numZ * 20;
 								scene.add(cloudMesh);
+								collidableObjects.push(cloudMesh);
 							}
 						}
 					}
 				}
+				thingYouLastSteppedOn = collidableObjects[0]; //TODO: maybe this doesn't make sense
+				
 			}
 
 
@@ -295,7 +312,182 @@
 				requestAnimationFrame( animate );
 				cursorEvents.update();
 				stats.update();
-				render(timestamp);
+          		
+          		updateMovement(frameTime);
+          		fixCollisions();
+				render(frameTime);
+			}
+			
+			var xspeed = 0;
+			var zspeed = 0;
+			var yspeed = 0;
+			var air =  0.09375; // airborne acceleration = 2x land acceleration
+			var acc =  0.046875;
+			var dec =  0.8;
+			var friction =  0.046875;
+			var top =  6;
+			var ytop =  16; // fastest you can fall
+			var grv = 0.21875;
+			var jumpPressed = false;
+			
+			function updateMovement( frameTime ) {
+				if (pet.position.y < -500){
+					pet.position.x = 0;
+					pet.position.y = 600;
+					pet.position.z = 0;
+					xspeed =0;
+					yspeed =0;
+				}
+				if (keyboard.pressed("p")){
+					console.log(pet.position);
+				}
+				var inTheAir = Math.abs(pet.position.y - yourHeightWhenYouWereLastOnTheGround) > 0.1;
+				var newJumpPressed = keyboard.pressed("v");
+				if (inTheAir){
+					yspeed += grv;
+					if (newJumpPressed == false && jumpPressed == true && yspeed < 0 && yspeed < -4 ){
+						yspeed = -4;
+						newJumpPressed = jumpPressed;
+					}
+					if (yspeed > ytop) yspeed = ytop;
+					
+					if (keyboard.pressed("i")){
+						zspeed -= air;
+						if (zspeed < -top) zspeed = -top;
+					}
+					if (keyboard.pressed("k")){
+						zspeed += air;
+						if (zspeed > top) zspeed = top;
+					}
+					if (keyboard.pressed("j")){
+						xspeed -= air;
+						if (xspeed < -top) xspeed = -top;
+					}
+					if (keyboard.pressed("l")){
+						xspeed += air;
+						if (xspeed > top) xspeed = top;
+					}
+				}
+				else {
+					if (newJumpPressed){
+						yspeed = -12.5;
+						jumpPressed = newJumpPressed;
+					}
+					// Apply friction if up or down not pressed
+					if (!keyboard.pressed("i") && !keyboard.pressed("k")){
+						if (zspeed > 0){
+							zspeed -= friction;
+							if (zspeed < 0) zspeed = 0;
+						}
+						else {
+							zspeed += friction;
+							if (zspeed > 0) zspeed = 0;
+						}
+					}
+					
+					// Apply friction if left or right not pressed
+					if (!keyboard.pressed("j") && !keyboard.pressed("l")){
+						if (xspeed > 0){
+							xspeed -= friction;
+							if (xspeed < 0) xspeed = 0;
+						}
+						else {
+							xspeed += friction;
+							if (xspeed > 0) xspeed = 0;
+						}
+					}
+					
+					if (keyboard.pressed("k")){
+						if (zspeed > 0){
+							zspeed += acc;
+						}
+						else {
+							zspeed += dec;
+						}
+						if (zspeed > top) zspeed = top;
+					}
+					if (keyboard.pressed("i")){
+						if (zspeed < 0){
+							zspeed -= acc;
+						}
+						else {
+							zspeed -= dec;
+						}
+						if (zspeed < -top) zspeed = -top;
+					}
+					
+					if (keyboard.pressed("l")){
+						if (xspeed > 0){
+							xspeed += acc;
+						}
+						else {
+							xspeed += dec;
+						}
+						if (xspeed > top) xspeed = top;
+					}
+					if (keyboard.pressed("j")){
+						if (xspeed < 0){
+							xspeed -= acc;
+						}
+						else {
+							xspeed -= dec;
+						}
+						if (xspeed < -top) xspeed = -top;
+					}
+				}
+				
+				
+				pet.position.x += xspeed * frameTime * 10;
+				pet.position.z += zspeed * frameTime * 10;
+				//gravity 
+				pet.position.y -= yspeed * frameTime * 10;
+				
+			}
+			
+			function fixCollisions()
+			{
+				var oneFix = false;
+				for (var i=0; i< collidableObjects.length; i++){
+					if (oneFix) break;
+					var collides = true;
+					var box = collidableObjects[i];
+					
+					if ( Math.abs( box.position.x - pet.position.x ) > (box.geometry.parameters.width/2 + pet.geometry.parameters.width/2)){
+						collides = false;
+					}
+					if ( Math.abs( box.position.y - pet.position.y ) > (box.geometry.parameters.height/2 + pet.geometry.parameters.height/2)){
+						collides = false;
+					}
+					if ( Math.abs( box.position.z - pet.position.z ) > (box.geometry.parameters.depth/2 + pet.geometry.parameters.depth/2)){
+						collides = false;
+					}
+					
+					if (collides){
+						//oneFix = true;
+						var diff = new THREE.Vector3().subVectors(box.position, pet.position);
+						var ray = new THREE.Raycaster( pet.position, diff.normalize()); 
+						var intersects = ray.intersectObjects( collidableObjects, true);
+
+						if (intersects[0]){
+							if (intersects[0].face.normal.x != 0){
+								pet.position.x = box.position.x + (box.geometry.parameters.width/2 + pet.geometry.parameters.width/2)*intersects[0].face.normal.x;
+								xspeed = 0;
+							}
+							if (intersects[0].face.normal.y != 0){
+								pet.position.y = box.position.y + (box.geometry.parameters.height/2 + pet.geometry.parameters.height/2)*intersects[0].face.normal.y;
+			            		thingYouLastSteppedOn = box;
+			            		yourHeightWhenYouWereLastOnTheGround = pet.position.y;
+							}
+							if (intersects[0].face.normal.z != 0){
+								pet.position.z = box.position.z + (box.geometry.parameters.depth/2 + pet.geometry.parameters.depth/2)*intersects[0].face.normal.z;
+								zspeed=0;
+							}
+						}
+						else {
+							console.log("something went wrong with collisions");
+						}
+					}
+				}
 			}
 
 			function render(timestamp){
