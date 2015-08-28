@@ -6,104 +6,311 @@
 -->
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>Pets Platformer</title>
+  <head>
+    <title>Pets Platformer</title>
 
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<script src="three.min.js"></script>
-		<script src="stats.min.js"></script>
-		<script src="OrbitControls.js"></script>
+    <meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<script src="three.min.js"></script>
+	<script src="stats.min.js"></script>
+	<script src="OrbitControls.js"></script>
 
-		<!-- Required by OBJMTLLoader.js -->
-		<script src="AltspaceSDK/lib/OBJMTLLoader.js"></script>
-		<script src="AltspaceSDK/lib/MTLLoader.js"></script>
-		<script src="AltspaceSDK/lib/firebase.js"></script>
+	<!-- Required by OBJMTLLoader.js -->
+	<script src="AltspaceSDK/src/AltOBJMTLLoader.js"></script>
+	<script src="AltspaceSDK/lib/OBJMTLLoader.js"></script>
 
-		<script src="AltspaceSDK/src/cursor/CursorEvents.js"></script>
-		<script src="AltspaceSDK/src/cursor/AltObjectControls.js"></script>
-		<script src="AltspaceSDK/src/sync/FirebaseSync.js"></script>
+	<script src="AltspaceSDK/lib/MTLLoader.js"></script>
+	<script src="AltspaceSDK/lib/firebase.js"></script>
 
-		<script src="AltspaceSDK/src/cursor/ColorHoverEffect.js"></script>
-		<script src="AltspaceSDK/src/cursor/DragPlaneEffect.js"></script>
+	<script src="AltspaceSDK/src/cursor/CursorEvents.js"></script>
+	<script src="AltspaceSDK/src/cursor/AltObjectControls.js"></script>
+	<script src="AltspaceSDK/src/sync/FirebaseSync.js"></script>
 
-		<script src="PerlinNoise.js"></script>
+	<script src="AltspaceSDK/src/cursor/ColorHoverEffect.js"></script>
+	<script src="AltspaceSDK/src/cursor/DragPlaneEffect.js"></script>
+	<script src="AltspaceSDK/src/helpers/Avatars.js"></script>
+	
+	<script src="PerlinNoise.js"></script>
+	<script src="threex.keyboardstate.js"></script> 
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 
-		<!-- keyboard events -->
-		<script src="threex.keyboardstate.js"></script> 
-		
+	<script src="GSAP/tween.min.js"></script>
+	<script src="GSAP/EasePack.min.js"></script>
+	<script src="GSAP/TweenLite.min.js"></script>
+	<script src="GSAP/TweenMax.min.js"></script>
+	<script src="GSAP/TimelineLite.min.js"></script>
+	<style>
+	  body {
+	    font-family: Monospace;
+		  margin: 0px;
+		  overflow: hidden;
+	  }
+	  #info {
+		  color: #fff;
+		  position: absolute;
+		  top: 10px;
+		  width: 100%;
+		  text-align: center;
+		  z-index: 100;
+		  display:block;
+	  }
+	  .modifiers{
+	  	display: flex;
+	  	flex-flow: row wrap;
+	  	justify-content: center;
+	  	align-content: center;
+	  }
 
-		<script src="GSAP/tween.min.js"></script>
-	    <script src="GSAP/EasePack.min.js"></script>
-	    <script src="GSAP/TweenLite.min.js"></script>
-	    <script src="GSAP/TweenMax.min.js"></script>
-	    <script src="GSAP/TimelineLite.min.js"></script>
-		<style>
-			body {
-				font-family: Monospace;
-				margin: 0px;
-				overflow: hidden;
-			}
-			#info {
-				color: #fff;
-				position: absolute;
-				top: 10px;
-				width: 100%;
-				text-align: center;
-				z-index: 100;
-				display:block;
-			}
-		</style>
+	  .modifier{
+	  	width: 80px;
+	  	display: flex;
+	  	flex-flow: column nowrap;
+	  	text-align: center;
+	  }
+	  
+	  h1 {
+	  	font-size: 16px;
+	  	background-color: white;
+	  }
+  </style>
 
 	</head>
 	<body>
 		<div id="info"></div>
 		<div id="viewport"></div>
+		<div class="modifiers">
+		  <div class="modifier">
+		    <input type="range" id="grvSlider" value=50>
+		    <h1 id="grvDisplay">grv</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="initialJumpSpeedSlider" value=50>
+		    <h1 id="initialJumpSpeedDisplay">jump</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="jumpInterruptFallSpeedSlider" value=50>
+		    <h1 id="jumpInterruptFallSpeedDisplay">fall</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="jumpInterruptThresholdSlider" value=50>
+		    <h1 id="jumpInterruptThresholdDisplay">falt</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="topSpeedSlider" value=50>
+		    <h1 id="topSpeedDisplay">top</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="accSlider" value=50>
+		    <h1 id="accDisplay">acc</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="decSlider" value=50>
+		    <h1 id="decDisplay">dec</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="airSlider" value=50>
+		    <h1 id="airDisplay">air</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="frictionSlider" value=50>
+		    <h1 id="frictionDisplay">friction</h1>
+		  </div>
+		</div>
+		<div class="modifiers">
+		  <div class="modifier">
+		    <input type="range" id="freq3DSlider" value=7>
+		    <h1 id="freq3DDisplay">frq3</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="thresh3DSlider" value=70>
+		    <h1 id="thresh3DDisplay">trs3</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="seed3DSlider" value=0>
+		    <h1 id="seed3DDisplay">seed3</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="freq2DSlider">
+		    <h1 id="freq2DDisplay">frq2</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="thresh2DSlider">
+		    <h1 id="thresh2DDisplay">trs2</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="seed2DSlider">
+		    <h1 id="seed2DDisplay">seed2</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="numXSlider">
+		    <h1 id="numXDisplay">numX</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="numYSlider">
+		    <h1 id="numYDisplay">numY</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="numZSlider">
+		    <h1 id="numZDisplay">numZ</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="blockSizeXSlider">
+		    <h1 id="blockSizeXDisplay">blkX</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="blockSizeYSlider"0>
+	  	  <h1 id="blockSizeYDisplay">blkY</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="blockSizeZSlider">
+	  	  <h1 id="blockSizeZDisplay">blkZ</h1>
+		  </div>
+		  <div class="modifier">
+		    <input type="range" id="platVertSlider">
+	  	  <h1 id="platVertDisplay">platVert</h1>
+		  </div>
+		</div>
 
 		<script>
-
 			var inAltspace = window.hasOwnProperty('altspace');
-
+	
 			var scene, camera, renderer, altRenderer, controls;
 			var cursorEvents, firebaseSync;
 			var loader;
 			var sound;
 			var stats;
-			var platformAnimations = [[]];
-			
 
 			var keyboard;
-
+			var haveEvents = 'ongamepadconnected' in window;
+			var controllers = {};
+			var frog;
 			var prevTimestamp = 0;
-			var perlin2D, perlin3D;
 			var pet;
+			var pets = {};
+			var userId;
 			var once = false;
 			var collidableObjects = [];
 			var raycaster = new THREE.Raycaster();
 			var thingYouLastSteppedOn;
 			var yourHeightWhenYouWereLastOnTheGround = 0;
 			var sceneCorrection = 410;
+			
+			var perlin2D, perlin3D;
+			var freq3D = 2.0;
+			var thresh3D = 0.7;
+			var freq2D = 0.5;
+			var thresh2D = 150;
+			var numX = 15;
+			var numY = 10;
+			var numZ = 15;
+			var blockSizeX = 100;
+			var blockSizeY = 10;			
+			var blockSizeZ = 80;
+			var dirtBlockSizeY = 40;
+			var seed2D = 0;
+			var seed3D = 0;
+			var petBB;
+			
+			var updateTime = 0;
+			var platVert = 60;
+			var stillLogValue = true;
+			
+			var xspeed = 0;
+			var zspeed = 0;
+			var yspeed = 0;
+			var initialJumpSpeed = -28.5;
+			var jumpInterruptFallSpeed = 10;
+			var jumpInterruptThreshold = -4;
+			var air =  1.0; // airborne acceleration = 2x land acceleration
+			var acc =  0.5;
+			var dec =  1.0;
+			var friction =  1.6;
+			var topSpeed =  14.5;
+			var ytopSpeed =  20; // fastest you can fall
+			var grv = 0.5;//0.21875;
+			var jumpPressed = false;
+			$("#grvSlider").on("input", function(){  
+				grv = this.value / 50.0; 
+			  //console.log("grv is " + grv); 
+			  $("#grvDisplay").html("grv " + grv);
+			} );
+			$("#topSpeedSlider").on("input", function(){  
+				topSpeed = this.value / 4.0;
+				//console.log("topSpeed is " + topSpeed); 
+				$("#topSpeedDisplay").html("top " + topSpeed);
+			} );
+			$("#airSlider").on("input", function(){ 
+				air= this.value / 4.0; 
+				//console.log("air is " + air); 
+				$("#airDisplay").html("air " + air);
+			});
+			$("#accSlider").on("input", function(){ 
+				acc= this.value / 8.0; 
+				//console.log("acc is " + acc); 
+				$("#accDisplay").html("acc " + acc);
+			});
+			$("#decSlider").on("input", function(){ 
+				dec= this.value / 8.0; 
+				//console.log("dec is " + dec); 
+				$("#decDisplay").html("dec " + dec);
+			});
+			$("#frictionSlider").on("input", function(){ 
+				friction= this.value / 20.0;
+			  //console.log("friction is " + friction);
+			  $("#frictionDisplay").html("frctn " + friction);
+			});
+			$("#initialJumpSpeedSlider").on("input", function(){ 
+				initialJumpSpeed= this.value / -2.0; 
+				//console.log("InitialJumpSpeed is " + initialJumpSpeed); 
+				$("#initialJumpSpeedDisplay").html("jump " + initialJumpSpeed);
+			});
+			$("#jumpInterruptFallSpeedSlider").on("input", function(){ 
+					jumpInterruptFallSpeed= this.value / 2.0; 
+				//console.log("jumpInterruptFallSpeed is " + jumpInterruptFallSpeed); 
+				$("#jumpInterruptFallSpeedDisplay").html("fall " + jumpInterruptFallSpeed);
+			});
+			$("#jumpInterruptThresholdSlider").on("input", function(){ 
+				jumpInterruptThreshold= -this.value / 2.0; 
+				//console.log("jumpInterruptFallSpeed is " + jumpInterruptFallSpeed); 
+				$("#jumpInterruptThresholdDisplay").html("falt " + jumpInterruptThreshold);
+			});
 
 			loadModels();
+			function resetPet(pet){
+				pet.position.x = 0;
+				pet.position.y = 600;
+				pet.position.z = 0;
+				xspeed =0;
+				yspeed =0;
+			}
 
 			function loadModels() {
 
-				var loader = new THREE.OBJMTLLoader();
+				var loader = new THREE.AltOBJMTLLoader();
 
 				// loader assumes .mtl file has same basename as .obj file
-				// var objFilename = "AltspaceSDK/examples/models/AltspaceCube/cube.obj";
-				// loader.load(objFilename, function ( loadedObject ) {
-				// 	onModelsLoaded();
-				// });
-				onModelsLoaded();
+				var objFilename = "models/frog.obj";
+				loader.load(objFilename, function ( loadedObject ) {
+					pet = loadedObject;
+					onModelsLoaded();
+				});
 				// NO CODE HERE unless you want it to run before models finish loading.
 			}
 
 			function onModelsLoaded() {
-
-				initScene();
-				initSync();
-
+					initScene();
+				if(inAltspace){	
+						altspace.getUser().then(function(id){
+	            userId = id.userId;
+	            initSync();
+	        });
+				}
+				else{
+					userId = Math.floor((Math.random() * 1000)).toString();
+					console.log(userId);
+					initSync();
+				}
+				initGamepad();
 				keyboard = new THREEx.KeyboardState();
 
 			}
@@ -119,6 +326,11 @@
 
 				scene = new THREE.Scene();
 
+				// if (inAltspace){
+	   //     window.Alt.Users.getLocalUser().then(function(user) {
+		  //       console.log(user.userId);
+	   //     });
+				// }
 				var container = document.createElement( 'div' );
 				document.body.appendChild( container );
 				if ( inAltspace ) {
@@ -154,33 +366,113 @@
 				pointLight = new THREE.PointLight( 0xffffff, 1.75 );
 				scene.add( pointLight );
 
-				stats = new Stats();
-				stats.domElement.style.position = 'absolute';
-				stats.domElement.style.top = '0px';
-				container.appendChild( stats.domElement );
+				//stats = new Stats();
+				//stats.domElement.style.position = 'absolute';
+				//stats.domElement.style.top = '0px';
+				//container.appendChild( stats.domElement );
+				
+
+  			makeProceduralEnvironment();
+				thingYouLastSteppedOn = collidableObjects[0]; //TODO: maybe this doesn't make sense
 				
 				// pet
-				pet = new THREE.Mesh(new THREE.BoxGeometry(20,20,20), new THREE.MeshBasicMaterial({ opacity: 0.5, color: 0x0000ff, transparent: true, map: THREE.ImageUtils.loadTexture('images/polka.png') }));
-				pet.position.x = 0;
-				pet.position.y = 700 - sceneCorrection;
-				pet.position.z = 0;
-				scene.add(pet);
+				//pet = new THREE.Mesh(new THREE.BoxGeometry(20,20,20), new THREE.MeshBasicMaterial({ opacity: 0.5, color: 0x0000ff, transparent: true, map: THREE.ImageUtils.loadTexture('images/polka.png') }));
+				
+				$("#freq3DSlider").on("change", function(){
+					freq3D = this.value / 10.0; 
+					remakeEnvironment(); 
+					console.log("freq3D is " + freq3D);
+				  $("#freq3DDisplay").html("frq3 " + freq3D);
+				});
+				$("#thresh3DSlider").on("change", function(){ 
+					thresh3D = 0.5 + this.value / 500.0; 
+					remakeEnvironment(); 
+					console.log("thresh3D is " + thresh3D); 
+				  $("#thresh3DDisplay").html("trs3 " + thresh3D);
+				});
+				$("#freq2DSlider").on("change", function(){ 
+					freq2D = this.value / 10.0; 
+					remakeEnvironment(); 
+					console.log("freq2D is " + freq2D); 
+				  $("#freq2DDisplay").html("frq2 " + freq2D);
+				});
+				$("#thresh2DSlider").on("change", function(){ 
+					thresh2D = this.value * 10.0; 
+					remakeEnvironment(); 
+					console.log("thresh2D is " + thresh2D); 
+				  $("#thresh2DDisplay").html("trs2 " + thresh2D);
+				});
+				$("#numXSlider").on("change", function(){ 
+					numX = this.value; 
+					remakeEnvironment(); 
+					//console.log("numX is " + numX); 
+				  $("#numXDisplay").html("numX " + numX);
+				});
+				$("#numYSlider").on("change", function(){ 
+					numY = this.value; 
+					remakeEnvironment(); 
+					//console.log("numY is " + numY);
+				  $("#numYDisplay").html("numY " + numY);
+				});
+				$("#numZSlider").on("change", function(){ 
+					numZ = this.value; 
+					remakeEnvironment(); 
+					//console.log("numZ is " + numZ); 
+				  $("#numZDisplay").html("numZ " + numZ);
+				});
+				$("#seed2DSlider").on("change", function(){ 
+					seed2D = this.value;
+					remakeEnvironment(); 
+					//console.log("seed2D is " + seed2D); 
+				  $("#seed2DDisplay").html("seed2 " + seed2D);
+				});
+				$("#seed3DSlider").on("change", function(){ 
+					seed3D = this.value; 
+					remakeEnvironment(); 
+					//console.log("seed3D is " + seed3D); 
+				  $("#seed3DDisplay").html("seed3 " + seed3D);
+				});
+				$("#blockSizeXSlider").on("change", function(){ 
+					blockSizeX = this.value; 
+					remakeEnvironment(); 
+					//console.log("blockSizeX is " + blockSizeX); 
+				  $("#blockSizeXDisplay").html("blkX " + blockSizeX);
+				});
+				$("#blockSizeYSlider").on("change", function(){ 
+					blockSizeY = this.value; 
+					remakeEnvironment(); 
+					//console.log("blockSizeY is " + blockSizeY); 
+				  $("#blockSizeYDisplay").html("blkY " + blockSizeY);
+				});
+				$("#blockSizeZSlider").on("change", function(){ 
+					blockSizeZ = this.value; 
+					remakeEnvironment(); 
+					//console.log("blockSizeZ is " + blockSizeZ); 
+				  $("#blockSizeZDisplay").html("blkZ " + blockSizeZ);
+				});
+				$("#platVertSlider").on("change", function(){ 
+					platVert = this.value; 
+					remakeEnvironment(); 
+					//console.log("blockSizeZ is " + blockSizeZ); 
+				  $("#platVertDisplay").html("platVert " + platVert);
+				});
+			}
 
-  				// procedural environment
-				perlin2D = new PerlinNoise(0.5, 1.0, 3, 2);
-				var numX = 15;
-				var numZ = 15;
+			function makeProceduralEnvironment(){
+				// procedural environment
+				perlin2D = new PerlinNoise(freq2D, 1.0, 3, seed2D);
 				var spacing = 1;
-				var blockGeometry = new THREE.BoxGeometry( 40, 40, 40 );
+				var blockGeometry = new THREE.BoxGeometry( blockSizeX, blockSizeY, blockSizeZ );
+				var dirtGeometry = new THREE.BoxGeometry(blockSizeX, dirtBlockSizeY, blockSizeZ );
 				var grassMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, map: THREE.ImageUtils.loadTexture('images/grass.jpg') });
 				var dirtMaterial = new THREE.MeshBasicMaterial({ color: 0x996633, map: THREE.ImageUtils.loadTexture('images/dirt.jpg') });
 				var grassMesh;
 				for(var i = 0; i <= numX * spacing ; i+=spacing){
 					for(var j = 0; j <= numZ * spacing; j+=spacing){
 						grassMesh = new THREE.Mesh(blockGeometry, grassMaterial);
-						grassMesh.position.y = perlin2D.perlinNoise2D(i, j) * 150 - sceneCorrection;
-						grassMesh.position.x = i * 40 - numX * 20;
-						grassMesh.position.z = j * 40 - numZ * 20;
+						grassMesh.position.y = perlin2D.perlinNoise2D(i, j) * thresh2D - sceneCorrection;
+						grassMesh.position.x = i * blockSizeX - numX * blockSizeX/2;
+						grassMesh.position.z = j * blockSizeZ - numZ * blockSizeZ/2;
 						collidableObjects.push(grassMesh);
 						scene.add(grassMesh);
 						
@@ -198,10 +490,14 @@
 							else if (noise > 0.33){
 							moveZ = noise * scale;
 						}
-						for(var k = 0; k <= ((i * j) % 15) / 3 ; k++){
-							var dirtMesh = new THREE.Mesh(blockGeometry, dirtMaterial);
+						for(var k = 0; k <= /*((i * j) % 15) /*/ 1; k++){
+							var dirtMesh = new THREE.Mesh(dirtGeometry, dirtMaterial);
 							dirtMesh.position.x = grassMesh.position.x;
-							dirtMesh.position.y = (grassMesh.position.y - (k+1) * 40) ;
+							dirtMesh.position.y = (grassMesh.position.y - (k+1) * dirtBlockSizeY + (dirtBlockSizeY - blockSizeY) / 2);//i swear
+							// we need branches
+							//t his is ridiculous
+							// to work on the same file
+							// simultaneously
 							dirtMesh.position.z = grassMesh.position.z;
 							if(!inAltspace){
 								//var anim = new TimelineMax({repeat: 0});
@@ -220,27 +516,55 @@
 						
 					}
 				}
-				perlin3D = new PerlinNoise(2.0, 10, 5, 0);
-				var cloudMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true, map: THREE.ImageUtils.loadTexture("images/sky.jpg")});
+				perlin3D = new PerlinNoise(freq3D, 10, 5, seed3D);
+				// var scalePlatformX = new PerlinNoise(1.5, 5, 5, 435);
+				// var scalePlatformZ = new PerlinNoise(3.0, 5, 5, 200);
+				var red = new PerlinNoise(0.1, 1, 3, 10);
+				var green = new PerlinNoise(0.1, 1, 3, 50);
+				var blue = new PerlinNoise(0.1, 1, 3, 100);
+        var cloudMaterial = new THREE.MeshBasicMaterial(/*{ color: 0xffffff, opacity: 0.5, transparent: true, map: THREE.ImageUtils.loadTexture("images/sky.jpg")}*/);
 				for(var x = 0; x <= numX; x++){
-					for(var y = 0; y <= 10; y++){
+					for(var y = 0; y <= numY; y++){
 						for(var z = 0; z <= numZ; z++){
-							if(perlin3D.perlinNoise3D(x, y, z) > 0.7){
+							if(perlin3D.perlinNoise3D(x, y, z) > thresh3D){
 								var cloudMesh = new THREE.Mesh(blockGeometry, cloudMaterial);
-								cloudMesh.position.x = x * 40 - numX * 20;
-								cloudMesh.position.y = (150 + y * 40) - sceneCorrection;
-								cloudMesh.position.z = z * 40 - numZ * 20;
+								cloudMesh.position.x = x * blockSizeX - numX * blockSizeX/2;
+								var redVal = red.perlinNoise3D(x, y, z);
+								var greenVal = green.perlinNoise3D(x, y, z);
+								var blueVal = blue.perlinNoise3D(x, y, z);
+								if(!inAltspace){
+									var col = new THREE.Color({r: redVal, g: greenVal, b: blueVal});
+									cloudMaterial = new THREE.MeshBasicMaterial({color: col});
+								}
+								else{
+									cloudMesh.userData.tintColor = {r: redVal, g: greenVal, b: blueVal};
+								}
+								// cloudMesh.material.color.setRGB(x/numX, y/numY, z/numZ);
+								cloudMesh.position.y = (thresh2D + y * platVert) - sceneCorrection;
+								//cloudMesh.position.y = (thresh2D + y * blockSizeY * platVert) - sceneCorrection;//original before john messed it up
+								cloudMesh.position.z = z * blockSizeZ - numZ * blockSizeZ/2;
+								// console.log((scalePlatformX.noise3D(x, y, z) + 1)/2);// * 5;
+								// cloudMesh.scale.z = scalePlatformZ.noise3D(x, y, z) * 5;
 								scene.add(cloudMesh);
 								collidableObjects.push(cloudMesh);
 							}
 						}
 					}
 				}
-				thingYouLastSteppedOn = collidableObjects[0]; //TODO: maybe this doesn't make sense
-				
 			}
 
-
+			function removeProceduralEnvironment(){
+				for(var i = 0; i < collidableObjects.length; i++){
+					scene.remove(collidableObjects[i]);
+				}					
+				collidableObjects.splice(0, collidableObjects.length);
+			}
+			
+			function remakeEnvironment(){
+				removeProceduralEnvironment(); 
+				makeProceduralEnvironment()
+			}
+			
 			function initEvents() {
 
 				cursorEvents = new CursorEvents( scene );
@@ -271,21 +595,48 @@
 				// cursorEvents.addEffect( dragEffect, cube );
 				// cursorEvents.addEffect( hoverEffect, cube );
 				window.addEventListener( 'resize', onWindowResize, false );
-				document.addEventListener("keydown", function() { console.log("keypress"); }, false);
+				window.addEventListener( 'beforeunload', function(){
+					removePet(userId, {});
+				});
+				scene.addEventListener("altuserleave", function() {
+					removePet(userId, {});
+				});
 			}
 
 			function initSync() {
 
 				var firebaseRootUrl = "https://altspace-apps.firebaseio.com/";
-				var appId = "spinning-cube";
+				var appId = "platform-pets";
 
-				var params = { authTokenPath: "AltspaceSDK/examples/tokens/spinning-cube-token.txt" };
+				var params = { authTokenPath: "platform-pets-token.txt" };
 
 				firebaseSync = new FirebaseSync( firebaseRootUrl, appId, params );
 
 				// firebaseSync.addObject( cube, "cube" );
-				firebaseSync.connect( onSyncReady );
-
+				// firebaseSync.addObject( pet, "pet" );
+				firebaseSync.connect( onSyncReady, addPet, removePet );
+				addPet(userId, {owner: userId});
+			}
+			
+			function addPet(key, syncData){
+				var pet_copy = pet.clone();
+				pet_copy.position.x = 0;
+				pet_copy.position.y = 600;
+				pet_copy.position.z = 0;
+				pet_copy.scale.set(8, 8, 8);
+				petBB = new THREE.Box3().setFromObject( pet_copy );//TODO: "clean this shit up" -abdullah yousufi, august 2015
+				firebaseSync.addObject(pet_copy, key);
+				pets[userId] = pet_copy;
+				scene.add(pet_copy);
+				if(userId == key){
+					pet = pet_copy;
+				}
+			}	
+			
+			function removePet(key, syncData){
+				firebaseSync.removeObject(key);
+				scene.remove(pets[key]);
+				delete pets[key];
 			}
 
 			function loadSoundEffect() {
@@ -309,28 +660,42 @@
 			function animate( timestamp ) {
 				var frameTime = ( timestamp - prevTimestamp ) * 0.001;
 				prevTimestamp = timestamp;
+				updateTime += frameTime;
 				requestAnimationFrame( animate );
 				cursorEvents.update();
-				stats.update();
+				//stats.update();
+
+        updateMovement(frameTime);
           		
-          		updateMovement(frameTime);
-          		fixCollisions();
+        fixCollisions(frameTime);
+        
+				if(updateTime > 0.05){
+					firebaseSync.saveObject(pet);
+					updateTime = 0;
+				}
 				render(frameTime);
 			}
 			
-			var xspeed = 0;
-			var zspeed = 0;
-			var yspeed = 0;
-			var air =  0.09375; // airborne acceleration = 2x land acceleration
-			var acc =  0.046875;
-			var dec =  0.8;
-			var friction =  0.046875;
-			var top =  6;
-			var ytop =  16; // fastest you can fall
-			var grv = 0.21875;
-			var jumpPressed = false;
 			
 			function updateMovement( frameTime ) {
+				if(!haveEvents){
+					scanGamepads();
+				}
+				var keys = []; //jump 3 , up 12, down 13, left 14, right 15
+				for(var c in controllers){
+					var controller = controllers[c];
+					for(var i = 0; i <= 15; i++){
+						var val = controller.buttons[i];
+						var pressed = val == 1.0;
+						if(pressed){
+							keys[i] = 1;
+						}
+						else{
+							keys[i] = 0;
+						}
+					}
+					break;
+				}
 				if (pet.position.y < -500){
 					pet.position.x = 0;
 					pet.position.y = 600;
@@ -342,39 +707,44 @@
 					console.log(pet.position);
 				}
 				var inTheAir = Math.abs(pet.position.y - yourHeightWhenYouWereLastOnTheGround) > 0.1;
-				var newJumpPressed = keyboard.pressed("v");
+				if (stillLogValue ) {
+					//console.log(Math.abs(pet.position.y - yourHeightWhenYouWereLastOnTheGround));
+				}
+				var newJumpPressed = keyboard.pressed("v") || keys[3];
 				if (inTheAir){
 					yspeed += grv;
-					if (newJumpPressed == false && jumpPressed == true && yspeed < 0 && yspeed < -4 ){
-						yspeed = -4;
+					if (newJumpPressed == false && jumpPressed == true && yspeed < 0 && yspeed < jumpInterruptThreshold){
+						
+						yspeed = jumpInterruptFallSpeed;
 						newJumpPressed = jumpPressed;
 					}
-					if (yspeed > ytop) yspeed = ytop;
+					if (yspeed > ytopSpeed) yspeed = ytopSpeed;
 					
-					if (keyboard.pressed("i")){
+					if (keyboard.pressed("i") || keys[12]){
 						zspeed -= air;
-						if (zspeed < -top) zspeed = -top;
+						if (zspeed < -topSpeed) zspeed = -topSpeed;
 					}
-					if (keyboard.pressed("k")){
+					if (keyboard.pressed("k") || keys[13]){
 						zspeed += air;
-						if (zspeed > top) zspeed = top;
+						if (zspeed > topSpeed) zspeed = topSpeed;
 					}
-					if (keyboard.pressed("j")){
+					if (keyboard.pressed("j") || keys[14]){
 						xspeed -= air;
-						if (xspeed < -top) xspeed = -top;
+						if (xspeed < -topSpeed) xspeed = -topSpeed;
 					}
-					if (keyboard.pressed("l")){
+					if (keyboard.pressed("l") || keys[15]){
 						xspeed += air;
-						if (xspeed > top) xspeed = top;
+						if (xspeed > topSpeed) xspeed = topSpeed;
 					}
+
 				}
 				else {
 					if (newJumpPressed){
-						yspeed = -12.5;
+						yspeed = initialJumpSpeed;
 						jumpPressed = newJumpPressed;
 					}
 					// Apply friction if up or down not pressed
-					if (!keyboard.pressed("i") && !keyboard.pressed("k")){
+					if ((!keyboard.pressed("i") || !keys[12]) && (!keyboard.pressed("k") || !keys[13])){
 						if (zspeed > 0){
 							zspeed -= friction;
 							if (zspeed < 0) zspeed = 0;
@@ -386,7 +756,7 @@
 					}
 					
 					// Apply friction if left or right not pressed
-					if (!keyboard.pressed("j") && !keyboard.pressed("l")){
+					if ((!keyboard.pressed("j") || !keys[14]) && (!keyboard.pressed("l") || !keys[15])){
 						if (xspeed > 0){
 							xspeed -= friction;
 							if (xspeed < 0) xspeed = 0;
@@ -397,54 +767,63 @@
 						}
 					}
 					
-					if (keyboard.pressed("k")){
+					if (keyboard.pressed("k") || keys[13]){
 						if (zspeed > 0){
 							zspeed += acc;
 						}
 						else {
 							zspeed += dec;
 						}
-						if (zspeed > top) zspeed = top;
+						if (zspeed > topSpeed) zspeed = topSpeed;
 					}
-					if (keyboard.pressed("i")){
+					if (keyboard.pressed("i") || keys[12]){
 						if (zspeed < 0){
 							zspeed -= acc;
 						}
 						else {
 							zspeed -= dec;
 						}
-						if (zspeed < -top) zspeed = -top;
+						if (zspeed < -topSpeed) zspeed = -topSpeed;
 					}
 					
-					if (keyboard.pressed("l")){
+					if (keyboard.pressed("l") || keys[15]){
 						if (xspeed > 0){
 							xspeed += acc;
 						}
 						else {
 							xspeed += dec;
 						}
-						if (xspeed > top) xspeed = top;
+						if (xspeed > topSpeed) xspeed = topSpeed;
 					}
-					if (keyboard.pressed("j")){
+					if (keyboard.pressed("j") || keys[14]){
 						if (xspeed < 0){
 							xspeed -= acc;
 						}
 						else {
 							xspeed -= dec;
 						}
-						if (xspeed < -top) xspeed = -top;
+						if (xspeed < -topSpeed) xspeed = -topSpeed;
 					}
 				}
 				
 				
 				pet.position.x += xspeed * frameTime * 10;
-				pet.position.z += zspeed * frameTime * 10;
-				//gravity 
 				pet.position.y -= yspeed * frameTime * 10;
+				pet.position.z += zspeed * frameTime * 10;
+				
+				if (Math.abs(xspeed) > 0 || Math.abs(zspeed) > 0){
+					if (zspeed >= 0){
+				    pet.rotation.set(0, Math.atan(xspeed / zspeed ), 0);
+					}
+					if (zspeed < 0){
+				    pet.rotation.set(0, Math.atan(xspeed / zspeed ) + Math.PI, 0);
+					}
+				}
+				
 				
 			}
 			
-			function fixCollisions()
+			function fixCollisions( frameTime )
 			{
 				var oneFix = false;
 				for (var i=0; i< collidableObjects.length; i++){
@@ -452,40 +831,62 @@
 					var collides = true;
 					var box = collidableObjects[i];
 					
-					if ( Math.abs( box.position.x - pet.position.x ) > (box.geometry.parameters.width/2 + pet.geometry.parameters.width/2)){
+					if ( Math.abs( box.position.x - pet.position.x ) > (box.geometry.parameters.width/2 + petBB.size().x/2)){
 						collides = false;
 					}
-					if ( Math.abs( box.position.y - pet.position.y ) > (box.geometry.parameters.height/2 + pet.geometry.parameters.height/2)){
+					if ( Math.abs( box.position.y - pet.position.y ) > (box.geometry.parameters.height/2 + petBB.size().y/2)){
 						collides = false;
 					}
-					if ( Math.abs( box.position.z - pet.position.z ) > (box.geometry.parameters.depth/2 + pet.geometry.parameters.depth/2)){
+					if ( Math.abs( box.position.z - pet.position.z ) > (box.geometry.parameters.depth/2 + petBB.size().z/2)){
 						collides = false;
 					}
 					
 					if (collides){
 						//oneFix = true;
+						pet.position.x -= xspeed * frameTime * 10;
+						pet.position.y += yspeed * frameTime * 10;
+						pet.position.z -= zspeed * frameTime * 10;//TODO: is this needed?
 						var diff = new THREE.Vector3().subVectors(box.position, pet.position);
 						var ray = new THREE.Raycaster( pet.position, diff.normalize()); 
-						var intersects = ray.intersectObjects( collidableObjects, true);
+						var intersects = ray.intersectObjects( [box], true);
+						//if (intersects.length > 0) console.log(intersects);
+						if (intersects[0]){
+							//console.log("hello world, my name is " );
+						}
+						if (intersects.length > 0 ){
+							//console.log( "the REAL slim shady");
+						}
 
+
+					  var freezeYThisFrame = false;
 						if (intersects[0]){
 							if (intersects[0].face.normal.x != 0){
-								pet.position.x = box.position.x + (box.geometry.parameters.width/2 + pet.geometry.parameters.width/2)*intersects[0].face.normal.x;
+								pet.position.x = box.position.x + (box.geometry.parameters.width/2 + petBB.size().x/2)*intersects[0].face.normal.x;
 								xspeed = 0;
 							}
-							if (intersects[0].face.normal.y != 0){
-								pet.position.y = box.position.y + (box.geometry.parameters.height/2 + pet.geometry.parameters.height/2)*intersects[0].face.normal.y;
-			            		thingYouLastSteppedOn = box;
-			            		yourHeightWhenYouWereLastOnTheGround = pet.position.y;
+							if (intersects[0].face.normal.y == 1){
+								pet.position.y = box.position.y + (box.geometry.parameters.height/2 + petBB.size().y/2)*intersects[0].face.normal.y;
+			          thingYouLastSteppedOn = box;
+			          yourHeightWhenYouWereLastOnTheGround = pet.position.y;
+			          freezeYThisFrame = true;
 							}
+			        if (intersects[0].face.normal.y == -1){
+								pet.position.y = box.position.y + (box.geometry.parameters.height/2 + petBB.size().y/2)*intersects[0].face.normal.y;
+			        	yspeed = jumpInterruptFallSpeed;
+			        }
 							if (intersects[0].face.normal.z != 0){
-								pet.position.z = box.position.z + (box.geometry.parameters.depth/2 + pet.geometry.parameters.depth/2)*intersects[0].face.normal.z;
+								pet.position.z = box.position.z + (box.geometry.parameters.depth/2 + petBB.size().z/2)*intersects[0].face.normal.z;
 								zspeed=0;
+								stillLogValue=false;
 							}
 						}
 						else {
-							console.log("something went wrong with collisions");
+							//console.log("something went wrong with collisions");
+							//console.log(frameTime);
 						}
+				    pet.position.x += xspeed * frameTime * 10;
+				    if (!freezeYThisFrame) pet.position.y -= yspeed * frameTime * 10;
+				    pet.position.z += zspeed * frameTime * 10;
 					}
 				}
 			}
@@ -498,6 +899,28 @@
 					renderer.render( scene, camera );
 					controls.update(timestamp);
 				}
+			}
+			
+			function initGamepad(){
+				window.addEventListener("gamepadconnected", addGamepad);
+				window.addEventListener("gamepaddisconnected", removeGamepad);
+				if(!haveEvents){
+					setInterval(scanGamepads, 500);
+				}
+			}
+			function scanGamepads(){
+				var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
+      	for (var i = 0; i < gamepads.length; i++) {
+        	if (gamepads[i]) {
+            	controllers[gamepads[i].index] = gamepads[i];
+          }
+     		}
+			}
+			function removeGamepad(e){
+				delete controllers[e.gamepad.index];
+			}
+			function addGamepad(e){
+				controllers[e.gamepad.index] = e.gamepad;
 			}
 
 		</script>
